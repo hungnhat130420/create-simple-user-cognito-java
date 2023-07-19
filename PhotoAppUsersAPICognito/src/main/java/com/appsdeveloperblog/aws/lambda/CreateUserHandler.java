@@ -25,6 +25,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
     private final String clientId = System.getenv("COGNITO_CLIENT_ID");
     private final String clientSecretId = System.getenv("COGNITO_CLIENT_SECRET_ID");
     private final Logger loggerContext = LoggerFactory.getLogger(CreateUserHandler.class);
+
     public CreateUserHandler() {
 
     }
@@ -37,7 +38,7 @@ public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestE
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
 
-        // Handle request body from request api gateway
+        // Handle request body from api gateway
         String requestBody = input.getBody();
         LambdaLogger logger = context.getLogger();
 

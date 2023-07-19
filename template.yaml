@@ -9,6 +9,12 @@ Description: >
 Globals:
   Function:
     Timeout: 20
+    Runtime: java11
+    Architectures:
+      - x86_64
+    MemorySize: 512
+    Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+      Variables:
 
 Resources:
   CreateUserHandlerFunction:
@@ -16,17 +22,23 @@ Resources:
     Properties:
       CodeUri: PhotoAppUsersAPICognito
       Handler: com.appsdeveloperblog.aws.lambda.CreateUserHandler::handleRequest
-      Runtime: java11
-      Architectures:
-        - x86_64
-      MemorySize: 512
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-        Variables:
       Events:
         CreateUser:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users
+            Method: post
+
+  ConfirmUserHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PhotoAppUsersAPICognito
+      Handler: com.appsdeveloperblog.aws.lambda.ConfirmUserCognitoHandle::handleRequest
+      Events:
+        ConfirmUser:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /confirm
             Method: post
 
 Outputs:

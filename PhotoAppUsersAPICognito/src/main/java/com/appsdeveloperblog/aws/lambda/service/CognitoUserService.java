@@ -3,9 +3,7 @@ package com.appsdeveloperblog.aws.lambda.service;
 import com.google.gson.JsonObject;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,16 +18,16 @@ import java.util.UUID;
  gửi lên và đã được xử lý thông qua lambda trước
 * */
 public class CognitoUserService {
-    private final CognitoIdentityProviderClient cognitoIdentityProviderClientClient;
+    private final CognitoIdentityProviderClient cognitoIdentityProviderClient;
 
     public CognitoUserService(String region) {
-        this.cognitoIdentityProviderClientClient = CognitoIdentityProviderClient.builder()
+        this.cognitoIdentityProviderClient = CognitoIdentityProviderClient.builder()
                 .region(Region.of(region))
                 .build();
     }
     public CognitoUserService(CognitoIdentityProviderClient cognitoClient) {
 
-        this.cognitoIdentityProviderClientClient = cognitoClient;
+        this.cognitoIdentityProviderClient = cognitoClient;
     }
 
     public JsonObject createUser(JsonObject user, String clientId,
@@ -79,7 +77,7 @@ public class CognitoUserService {
                 secretHash(generatedSecretHash).
                 build();
 
-        SignUpResponse signUpResponse = cognitoIdentityProviderClientClient.signUp(signUpRequest);
+        SignUpResponse signUpResponse = cognitoIdentityProviderClient.signUp(signUpRequest);
         JsonObject createUserResult = new JsonObject();
 
         // Init return type for lambda
@@ -91,6 +89,28 @@ public class CognitoUserService {
         return createUserResult;
     }
 
+    //Handle Confirm User Signup
+    public JsonObject confirmUserSignup(String clientId,
+                                  String clientSecretId,
+                                  String email,
+                                  String confirmationCode) {
+
+       String secretHash = calculateSecretHash(clientId, clientSecretId, email);
+       ConfirmSignUpRequest confirmSignUpRequest =
+               ConfirmSignUpRequest
+                .builder()
+                .secretHash(secretHash)
+                .username(email)
+                .confirmationCode(confirmationCode)
+                .clientId(clientId)
+                .build();
+        ConfirmSignUpResponse confirmSignUpResponse = cognitoIdentityProviderClient.confirmSignUp(confirmSignUpRequest);
+        JsonObject response = new JsonObject();
+        response.addProperty("isSuccessful", confirmSignUpResponse.sdkHttpResponse().isSuccessful());
+        response.addProperty("statusCode", confirmSignUpResponse.sdkHttpResponse().statusCode());
+        response.addProperty("message", "User confirmed successfully");
+        return response;
+    }
 
     // Method for generating secret hash
     private static String calculateSecretHash(String userPoolClientId, String userPoolClientSecret, String userName) {
