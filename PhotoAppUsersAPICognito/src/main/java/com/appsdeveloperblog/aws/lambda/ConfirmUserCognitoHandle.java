@@ -13,8 +13,8 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 public class ConfirmUserCognitoHandle implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private final CognitoUserService cognitoUserService = new CognitoUserService("ap-southeast-1");
 
-    private static final String clientId = "5i0jif7iaf8te7d3bie55e9koo";
-    private static final String clientSecretId = "15gdk8vajets3r4esige02homgqjpq5s02na5u26mgh5k23nnro4";
+    private static final String clientId = "COGNITO_CLIENT_ID";
+    private static final String clientSecretId = "COGNITO_CLIENT_SECRET_ID";
 
     public ConfirmUserCognitoHandle() {
 

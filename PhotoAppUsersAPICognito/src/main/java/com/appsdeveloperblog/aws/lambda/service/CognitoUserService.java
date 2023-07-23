@@ -8,10 +8,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /*
  Class này dùng để xử lý việc đăng kí user sau khi request thông qua Cognito
@@ -95,11 +92,11 @@ public class CognitoUserService {
                                   String email,
                                   String confirmationCode) {
 
-       String secretHash = calculateSecretHash(clientId, clientSecretId, email);
+       String generateSecretHash = calculateSecretHash(clientId, clientSecretId, email);
        ConfirmSignUpRequest confirmSignUpRequest =
                ConfirmSignUpRequest
                 .builder()
-                .secretHash(secretHash)
+                .secretHash(generateSecretHash)
                 .username(email)
                 .confirmationCode(confirmationCode)
                 .clientId(clientId)
@@ -109,6 +106,36 @@ public class CognitoUserService {
         response.addProperty("isSuccessful", confirmSignUpResponse.sdkHttpResponse().isSuccessful());
         response.addProperty("statusCode", confirmSignUpResponse.sdkHttpResponse().statusCode());
         response.addProperty("message", "User confirmed successfully");
+        return response;
+    }
+
+    public JsonObject loginUser(JsonObject userDetail, String clientId, String clientSecretId) {
+        String email = userDetail.get("email").getAsString();
+        String passWord = userDetail.get("password").getAsString();
+        String generatedSecretHash = calculateSecretHash(clientId, clientSecretId, email);
+        Map<String, String> authParams = new HashMap<String, String>(){
+            {
+                put("USERNAME", email);
+                put("PASSWORD", passWord);
+                put("SECRET_HASH", generatedSecretHash);
+            }
+        };
+
+        InitiateAuthRequest initiateAuthRequest = InitiateAuthRequest.builder()
+                .clientId(clientId)
+                .authFlow(AuthFlowType.USER_PASSWORD_AUTH)
+                .authParameters(authParams)
+                .build();
+
+        InitiateAuthResponse initiateAuthResponse = cognitoIdentityProviderClient.initiateAuth(initiateAuthRequest);
+        AuthenticationResultType authenticationResultType = initiateAuthResponse.authenticationResult();
+
+        JsonObject response = new JsonObject();
+        response.addProperty("isSuccessful", initiateAuthResponse.sdkHttpResponse().isSuccessful());
+        response.addProperty("statusCode", initiateAuthResponse.sdkHttpResponse().statusCode());
+        response.addProperty("idToken", authenticationResultType.idToken());
+        response.addProperty("accessToken", authenticationResultType.accessToken());
+        response.addProperty("refreshToken", authenticationResultType.refreshToken());
         return response;
     }
 
