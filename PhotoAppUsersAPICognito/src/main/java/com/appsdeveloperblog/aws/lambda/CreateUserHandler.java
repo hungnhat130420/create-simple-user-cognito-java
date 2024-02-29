@@ -22,8 +22,8 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 public class CreateUserHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private final CognitoUserService cognitoUserService = new CognitoUserService("ap-southeast-1");
-    private final String clientId = System.getenv("COGNITO_CLIENT_ID");
-    private final String clientSecretId = System.getenv("COGNITO_CLIENT_SECRET_ID");
+    private static final String clientId = "5i0jif7iaf8te7d3bie55e9koo";
+    private static final String clientSecretId = "15gdk8vajets3r4esige02homgqjpq5s02na5u26mgh5k23nnro4";
     private final Logger loggerContext = LoggerFactory.getLogger(CreateUserHandler.class);
 
     public CreateUserHandler() {
